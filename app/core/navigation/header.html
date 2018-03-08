@@ -1,0 +1,28 @@
+<div class="header"
+	ng-class="{
+		'rotate': $ctrl.direction == 'up',
+		'rotateBack': $ctrl.direction == 'down'
+	}">
+	<div class="header-perspective">
+		<div class="header-front">
+			<div class="header-container">
+				<span>{{ $ctrl.title }}</span> 
+				<div class="button" ng-click="$ctrl.goToLogin()">
+					<i class="material-icons">person_pin</i>
+				</div>
+			</div>
+		</div>
+		<div class="header-bottom">
+			<div class="header-container">
+				<ul>
+					<li ng-repeat="link in $ctrl.links" ng-click="$ctrl.goTo(link.id)">
+						<span>{{ link.name }}</span>
+					</li>
+				</ul>
+				<div class="button" ng-click="$ctrl.goToLogin()">
+					<i class="material-icons">person_pin</i> Log In
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
