@@ -7,6 +7,17 @@ var io = require('socket.io')(server);
 var users = [];
 var sockets = {};
 
+// env fields
+var ENV_TABLE = process.env.TABLE;
+var ENV_REGION = process.env.REGION;
+
+// Amazon Web Services stuff.
+var AWS = require('aws-sdk');
+AWS.config.update({
+  region: ENV_REGION
+});
+var docClient = new AWS.DynamoDB.DocumentClient();
+
 io.on('connection', function(socket){
   console.log('someone connected');
   var userId;
@@ -24,13 +35,32 @@ io.on('connection', function(socket){
   });
 });
 
-function emitToSockets(message){
+function emitToSockets(data){
   Object.keys(users).forEach(function(id){
     var user = users[id];
-    var convert = convertDataset(message);
-    console.log('emit to user: ' + user.id);
-    console.log(convert);
-    user.socket.emit('file', convert);
+    user.socket.emit('file', data);
+  });
+}
+
+function sendToAWS(dataset){
+  dataset.forEach(function(data){
+    var params = {
+      TableName: ENV_TABLE,
+      Item: {
+        'timestamp': data.x.getTime(),
+        'amps': data.y
+      }
+    };
+
+    console.log(params);
+
+    docClient.put(params, function(err, data){
+      if(err){
+        console.log('dynamoDB failed: ' + err);
+      } else {
+        console.log('put succeeded');
+      }
+    });
   });
 }
 
@@ -43,8 +73,8 @@ function convertDataset(text, userId){
       dataset = lines.map(function( line ){
         var set = line.split(',');
         return {
-          x: new Date(parseInt(set[0])),
-          y: parseFloat(set[1])
+          x: new Date(parseInt(set[1])),
+          y: parseFloat(set[0])
         };
       });
     }
@@ -56,8 +86,9 @@ function convertDataset(text, userId){
 
 client.stdout.on('data', function(message){
   console.log(message.toString());
-
-  emitToSockets(message.toString());
+  var convert = convertDataset(message.toString());
+  sendToAWS(convert.data);
+  emitToSockets(convert);
 });
 
 client.stderr.on('data', function(message){

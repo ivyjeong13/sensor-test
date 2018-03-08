@@ -13,7 +13,7 @@ def simp():
 	global counter
 	now = time.time() * 1000
 
-	print(str(now) + ',' + str(amps))
+	print(str(amps) + ',' + str(now))
 	if counter == iterations:
 		choice = randint(0,1)
 		counter = 0
