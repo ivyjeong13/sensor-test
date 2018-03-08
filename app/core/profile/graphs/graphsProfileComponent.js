@@ -23,28 +23,15 @@
     $ctrl.$onInit = function(){
       buildGraphs();
 
-      socket = io.connect('localhost:8080/data');
-      socket.on('connect', function(){
-        console.log('on connect');
-
+      socket = io.connect('http://localhost:8000');
+      console.log('trying connect');
+      socket.on('connect',function(){
         userId = '_' + Math.random().toString(36).substr(2, 9);
         socket.emit('new user', userId);
+      });
 
-        socket.on('file', function(response){
-          liveData.add(response.data);
-        });
-        // ss(socket).on('file', function (stream){
-        //   console.log('recieved');
-         
-        //   stream.on('data', function(chunk){
-        //     data += chunk;
-        //   });
-
-        //   stream.on('end', function(){
-        //     console.log('end');
-        //     console.log(data);
-        //   });
-        // });
+      socket.on('file', function(response){
+        liveData.add(response.data);
       });
     };
 
