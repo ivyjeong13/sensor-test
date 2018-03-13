@@ -739,8 +739,109 @@ div[ui-view="footer"] .footer{
     font-weight:lighter;
 }
 
-#img{
-    width:50%;
+.graphs-wrapper > *:not(:first-child) {
+    margin-top:25px;
+}
+
+.day-selector{
+    width:100%;
+    height:50px;
+    position:relative;
+}
+.day-selector > span{
+    position:relative;
+    z-index:1;
+    display:block;
+    width:20%;
+    float:left;
+    border-right:1px solid #fff;
+    border-left:1px solid #fff;
+    height:50px;
+    text-align:center;
+    color:#fff;
+    font-size:18px;
+    font-weight:lighter;
+    padding:8px 0;
+    cursor:pointer;
+}
+
+.uib-daypicker{
+    color:#000;
+}
+
+.uib-daypicker table{
+    width:100%;
+}
+
+.day-selector span + span{
+    border-left:0;
+}
+
+.day-selector span:hover{
+    background:rgba(255,255,255,0.25);
+}
+.day-selector span > i {
+    position:relative;
+    top:5px;
+}
+.day-selector span.display-and-select-date{
+    width:60%;
+}
+.day-selector:after{
+    content:'';
+    width:200%;
+    left:-50%;
+    top:0;
+    height:100%;
+    position:absolute;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#a7cfdf+0,23538a+100;Blue+3d+%238 */
+    background: rgb(167,207,223); /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(167,207,223,1) 0%, rgba(35,83,138,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, rgba(167,207,223,1) 0%,rgba(35,83,138,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, rgba(167,207,223,1) 0%,rgba(35,83,138,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a7cfdf', endColorstr='#23538a',GradientType=0 ); /* IE6-9 */
+    z-index:-1;
+}
+
+.spinner-container{
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    background:rgba(255,255,255,0.75);
+    z-index:1002;
+}
+
+.lds-dual-ring {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 1px;
+  border-radius: 50%;
+  border: 5px solid #1273d2;
+  border-color: #1273d2 transparent #1273d2 transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 800px) {

@@ -10,12 +10,20 @@ var sockets = {};
 // env fields
 var ENV_TABLE = process.env.TABLE;
 var ENV_REGION = process.env.REGION;
+var ENDPOINT = process.env.ENDPOINT; // make sure this is localdb
 
 // Amazon Web Services stuff.
 var AWS = require('aws-sdk');
 AWS.config.update({
   region: ENV_REGION
 });
+
+if(ENDPOINT){
+  AWS.config.update({
+    endpoint: ENDPOINT
+  });
+}
+
 var docClient = new AWS.DynamoDB.DocumentClient();
 
 io.on('connection', function(socket){
@@ -42,7 +50,7 @@ function emitToSockets(data){
   });
 }
 
-function sendToAWS(dataset){
+function sendToLocalDB(dataset){
   dataset.forEach(function(data){
     var params = {
       TableName: ENV_TABLE,
@@ -87,7 +95,7 @@ function convertDataset(text, userId){
 client.stdout.on('data', function(message){
   console.log(message.toString());
   var convert = convertDataset(message.toString());
-  sendToAWS(convert.data);
+  //sendToLocalDB(convert.data);
   emitToSockets(convert);
 });
 
@@ -107,9 +115,12 @@ client.on('disconnect', function(){
   console.log('disconnect');
 });
 
-app.set('port', (process.env.PORT || 8000));
+app.set('port', (process.env.PORT || 8080));
 
 app.use(express.static(__dirname + '/app'));
+
+var routes = require('./api/routes/awsRoutes');
+routes(app);
 
 server.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));

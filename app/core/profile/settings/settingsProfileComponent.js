@@ -4,7 +4,7 @@
   angular.module('mainApp')
     .component('settingsProfile', {
       controller: settingsProfileController,
-      templateUrl: '/core/profile/graphs/graphsProfile.html'
+      templateUrl: '/core/profile/settings/settingsProfile.html'
     });
 
   function settingsProfileController(){

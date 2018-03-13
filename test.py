@@ -3,7 +3,7 @@ import time
 import sys
 from random import randint
 
-amps = 20
+amps = 5
 iterations = 2
 counter = 0
 
@@ -19,7 +19,7 @@ def simp():
 		counter = 0
 		if choice == 1 or (choice == 0 and amps <= 5):
 			amps = amps + 5
-		elif choice == 0 or (choice == 1 and amps >= 70): 
+		elif choice == 0 or (choice == 1 and amps >= 15): 
 			amps = amps - 5
 	counter = counter + 1
 

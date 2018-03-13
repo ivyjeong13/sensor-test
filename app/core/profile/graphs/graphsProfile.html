@@ -1,39 +1,40 @@
 <div class="container">
-  <!-- TEST -->
-  <img id="img" src=''/>
-  <!-- TEST -->
-
-  <div class="selection">
-    <select class="mobile-only">
-      <!-- mobile dropdown -->
-    </select>
-    <ul class="no-mobile">
-      <li> Today </li>
-      <li> <!-- Monday to Sunday -->
-      </li>
-    </ul>
-  </div>
-
   <div class="graphs-wrapper">
-    <div class="types">
-      <span><i class="material-icons">timeline</i></span>
-      <span><i class="material-icons">timeline</i></span>
-      <span><i class="material-icons">timeline</i></span>
+    <div class="day-selector">
+      <span ng-click="$ctrl.goPrev()">
+        <i class="material-icons">navigate_before</i> Previous Day
+      </span>
+      <span ng-click="$ctrl.dateDialog = !$ctrl.dateDialog" class="display-and-select-date">
+        <i class="material-icons">timeline</i>
+        {{ $ctrl.dateLabel }}
+
+        <div ng-show="$ctrl.dateDialog" ng-model="$ctrl.chosenDate" ng-click="$ctrl.selectDate($event)" uib-datepicker ng-model="dt" class="well well-sm"></div>
+      </span>
+      <span ng-click="$ctrl.goNext()">
+        <i class="material-icons">navigate_next</i> Next Day
+      </span>
     </div>
-    <div id="profile-live-visualization" class="profile-graph"></div>
-    <div id="profile-time-visualization" class="profile-graph"></div>
-    <div id="profile-diff-visualization" class="profile-graph"></div>
-    <div id="profile-histogram-visualization" class="profile-graph"></div>
+
+    <div ng-hide="!$ctrl.isToday" id="profile-live-visualization" class="profile-graph"></div>
+
+    <div ng-hide="$ctrl.isToday">
+      <div ng-show="$ctrl.hasData">
+        <span>
+          <p>Electricity being used over the day.</p>
+          <div id="profile-time-visualization" class="profile-graph"></div>
+        </span>
+        <div id="profile-diff-visualization" class="profile-graph"></div>
+        <div id="profile-histogram-visualization" class="profile-graph"></div>
+      </div>
+      <div ng-show="!$ctrl.hasData">
+        Unfortunately, there is no data for this day.
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="container">
-  Last 5 Days
+<div class="spinner-container" ng-show="$ctrl.isLoading">
+  <div class="lds-dual-ring"></div>
 </div>
-
-<div class="container">
-  Select A Day
-</div>
-
 
 
