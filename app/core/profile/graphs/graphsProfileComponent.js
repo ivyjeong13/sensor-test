@@ -31,7 +31,6 @@
       var today = new Date();
       chosenDate = today;
       $ctrl.dateLabel = getChosenDateLabel();
-      buildLiveGraph();
 
       socket = io.connect($constants.HOST + ':' + $constants.SERVER_PORT);
       console.log('trying connect');
@@ -40,21 +39,21 @@
         socket.emit('new user', userId);
       });
 
-      socket.on('file', function(response){
-        var updated = response.data.map(function(item){
-          return {
-            x: item.x,
-            y: item.y * FUDGE_AMT
-          };
-        });
-        liveData.add(updated);
-      });
+      getDataAndSetTables();
+
+      // socket.on('file', function(response){
+      //   var updated = response.data.map(function(item){
+      //     return {
+      //       x: item.x,
+      //       y: item.y * FUDGE_AMT
+      //     };
+      //   });
+      //   liveData.add(updated);
+      // });
     };
 
     $ctrl.$onDestroy = function(){
-      liveGraph.destroy();
-      unmodifiedGraph.destroy();
-      diffGraph.destroy();
+      destroyGraphs();
       socket.close();
       //histoGraph.destroy();
     };
@@ -83,9 +82,9 @@
     }
 
     function getChosenDateLabel(){
-      var month = chosenDate.getUTCMonth() + 1;
-      var date = chosenDate.getUTCDate();
-      var year = chosenDate.getUTCFullYear();
+      var month = chosenDate.getMonth() + 1;
+      var date = chosenDate.getDate();
+      var year = chosenDate.getFullYear();
 
       var monthStr = month < 10 ? '0' + month.toString() : month.toString();
       var dateStr = date < 10 ? '0' + date.toString() : date.toString();
@@ -94,9 +93,9 @@
 
     function isToday(){
       var today = new Date();
-      if(today.getUTCMonth() === chosenDate.getUTCMonth() &&
-        today.getUTCDate() === chosenDate.getUTCDate() &&
-        today.getUTCFullYear() === chosenDate.getUTCFullYear()){
+      if(today.getMonth() === chosenDate.getMonth() &&
+        today.getDate() === chosenDate.getDate() &&
+        today.getFullYear() === chosenDate.getFullYear()){
         return true;
       }
       return false;
@@ -105,19 +104,24 @@
     function getDataAndSetTables(){
       destroyGraphs();
 
-      if(isToday()){
-        return;
-      }
-
-      //$ctrl.isLoading = true;
+      $ctrl.isLoading = true;
+      $ctrl.hasData = true;
       $http.get('/api/day/' + getChosenDateLabel().split('/').join('')).then(function(response){
         var data = response.data;
+        $ctrl.isLoading = false;
         if(data.dataset){
-          $ctrl.hasData = true;
-          buildGraphs(convertXY(data.dataset));
+          console.log(convertXY(data.dataset));
+          if(isToday()){
+            buildLiveGraph(convertXY(data.dataset));
+          } else {
+            buildGraphs(convertXY(data.dataset));
+          }
         } else {
-          //$ctrl.isLoading = false;
           $ctrl.hasData = false;
+
+          if(isToday()){
+            buildLiveGraph([]);
+          }
         }
       }, function(response){
         console.log('error occurred: ' + JSON.stringify(response));
@@ -150,7 +154,12 @@
 
     function destroyGraphs(){
       if(unmodifiedGraph){
-        unmodifiedGraph.destroy();
+        try{ 
+          unmodifiedGraph.destroy();
+        } 
+        catch(err){
+          console.log(err);
+        }      
       }
       if(diffGraph){
         diffGraph.destroy();
@@ -177,32 +186,76 @@
       setTimeout(renderStep, DELAY);
     }
 
-    function buildLiveGraph(){
-      var stepTimer = setTimeout(renderStep, DELAY);
-      strategy = 'static';
-      liveData = new vis.DataSet();
-      var options = {
-        start: vis.moment().add(-30, 'seconds'),
-        end: vis.moment(),
-        dataAxis: {
-          left: {
-            range: {
-              min: 0
-            },
-            title: {
-              text: 'amps RPM'
+    function buildLiveGraph(data){
+      var lastTen = data.slice(-10);
+      Highcharts.chart('profile-live-visualization', {
+        chart: {
+          zoomType: 'x',
+          type: 'spline',
+          animation: Highcharts.svg,
+          events: {
+            load: function () {
+              var chart = this;
+              var series = chart.series[0];
+              socket.on('file', function(response){
+                var updated = response.data.map(function(item){
+                  return [new Date(item.x).getTime(), item.y * FUDGE_AMT];
+                });
+
+                updated.forEach(function(item){
+                  series.addPoint(item, true, true);
+                });
+              });
             }
+          },
+        },
+        title: {
+          text: 'Amps RMS Over Time'
+        },
+        xAxis: {
+          type: 'datetime',
+        },
+        yAxis: {
+          title: {
+            text: 'amps RMS'
           }
         },
-        drawPoints: {
-          style: 'circle'
+        legend: {
+          enabled: false
         },
-        shaded: {
-          orientation: 'bottom'
+        series: [{
+          name: 'amps RMS',
+          data: lastTen
+        }],
+        time: {
+          useUTC: false
         }
-      };
-      var container = document.getElementById('profile-live-visualization');
-      liveGraph = new vis.Graph2d(container, liveData, options);
+      }); 
+      // var stepTimer = setTimeout(renderStep, DELAY);
+      // strategy = 'static';
+      // liveData = new vis.DataSet();
+      // var options = {
+      //   start: vis.moment().add(-30, 'seconds'),
+      //   end: vis.moment(),
+      //   dataAxis: {
+      //     left: {
+      //       range: {
+      //         min: 0
+      //       },
+      //       title: {
+      //         text: 'amps RMS'
+      //       }
+      //     }
+      //   },
+      //   drawPoints: {
+      //     style: 'circle'
+      //   },
+      //   shaded: {
+      //     orientation: 'bottom'
+      //   }
+      // };
+      // var container = document.getElementById('profile-live-visualization');
+      // liveGraph = new vis.Graph2d(container, liveData, options);
     }
 
     function buildDefaultGraph(data){
@@ -240,7 +293,7 @@
         },
         yAxis: {
           title: {
-            text: 'amps RPM'
+            text: 'amps RMS'
           }
         },
         legend: {
@@ -248,9 +301,12 @@
         },
         series: [{
           type: 'line',
-          name: 'amps RPM over Time',
+          name: 'amps RMS',
           data: data
-        }]
+        }],
+        time: {
+          useUTC: false
+        }
       });
     }
 

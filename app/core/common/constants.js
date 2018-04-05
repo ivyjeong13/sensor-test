@@ -6,5 +6,6 @@ angular.module('mainApp')
 			{name: 'Technology', id: 'home_section_2'}, 
 			{name: 'Flexibility', id: 'home_section_3'}
 		],
-		HOST: 'localhost'
+		HOST: 'localhost',
+		SERVER_PORT : '8080'
 	});
